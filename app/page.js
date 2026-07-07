@@ -7,6 +7,12 @@ import { translations } from '../utils/translations'; // ◄ Import restructured
 export default function HomePage({ lang = 'en' }) { // ◄ Captures active code state directly from layout shell
   const [applications, setApplications] = useState([]); 
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('on-sale');
+  
+  const getDbField = (item, baseFieldName) => {
+    const localizedKey = `${baseFieldName}_${lang}`;
+    return item[localizedKey] || item[`${baseFieldName}_en`] || item[baseFieldName] || '';
+  };
 
   useEffect(() => {
     async function fetchDatabaseData() {
