@@ -35,26 +35,116 @@ export default function HomePage({ lang = 'en' }) { // ◄ Captures active code 
         <span class="text-xl">💬</span> {translations.whatsappBtn[lang]}
       </a>
 
-      {/* --- HERO GRAPHICS AND DISPLAY TEXT SLOTS --- */}
-      <section class="max-w-6xl mx-auto px-4 pt-12">
-        <div class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-8 md:p-12 text-white shadow-xl space-y-6 relative overflow-hidden">
-          <div class="max-w-xl space-y-2 relative z-10">
-            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">{translations.heroTitle[lang]}</h1>
-            <p class="text-slate-300 text-base">{translations.heroSub[lang]}</p>
-          </div>
+      {/* --- CORE TAB SELECTION CODES --- */}
+      <section class="space-y-4">
+        {/* Tab Buttons Cluster Layout */}
+        <div class="flex border-b border-slate-200 gap-2 overflow-x-auto scrollbar-none">
+          <button 
+            onClick={() => setActiveTab('on-sale')} 
+            class={`pb-3 px-4 text-sm font-bold border-b-2 whitespace-nowrap transition-all ${activeTab === 'on-sale' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          >
+            🟢 {lang === 'en' ? 'Active Ballot & Sales' : lang === 'zh_hk' ? '現正發售及抽籤項目' : '現正发售及抽签项目'}
+          </button>
+          <button 
+            onClick={() => setActiveTab('upcoming')} 
+            class={`pb-3 px-4 text-sm font-bold border-b-2 whitespace-nowrap transition-all ${activeTab === 'upcoming' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          >
+            📅 {lang === 'en' ? 'Upcoming Launches' : lang === 'zh_hk' ? '即將推出物業' : '即将推出物业'}
+          </button>
+          <button 
+            onClick={() => setActiveTab('inventory')} 
+            class={`pb-3 px-4 text-sm font-bold border-b-2 whitespace-nowrap transition-all ${activeTab === 'inventory' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          >
+            📊 {lang === 'en' ? 'Inventory & Price Range' : lang === 'zh_hk' ? '剩餘單位及價格範圍' : '剩余单位及价格范围'}
+          </button>
+        </div>
+      
+        {/* DISPLAY CONTENT GRID WINDOW */}
+        <div class="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
           
-          <div class="max-w-xl relative group z-10">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 text-lg">🔍</div>
-            <input 
-              type="text" 
-              placeholder={translations.searchPlaceholder[lang]} 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)} 
-              class="w-full pl-11 pr-4 py-3.5 bg-white text-slate-900 border-none rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-base placeholder-slate-400"
-            />
-          </div>
+          {/* TAB 1: Live Ballot Drawings Board (Flight Status Style) */}
+          {activeTab === 'on-sale' && (
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-900 text-white text-xs font-bold uppercase tracking-wider">
+                    <th class="p-4">{lang === 'en' ? 'Project' : '項目名稱'}</th>
+                    <th class="p-4">{lang === 'en' ? 'District' : '地區'}</th>
+                    <th class="p-4">{lang === 'en' ? 'Ballot Draw Date' : '抽籤日期'}</th>
+                    <th class="p-4">{lang === 'en' ? 'Status' : '狀態'}</th>
+                  </tr>
+                </thead>
+                <tbody class="text-sm divide-y divide-slate-100 font-medium">
+                  {applications.filter(item => item.tab_type === 'on-sale' || !item.tab_type).map(item => (
+                    <tr key={item.id} class="hover:bg-slate-50 transition-colors">
+                      <td class="p-4 font-bold text-slate-900 text-base">{getDbField(item, 'project_name')}</td>
+                      <td class="p-4 text-slate-500">{getDbField(item, 'district')}</td>
+                      <td class="p-4 font-mono text-blue-600 bg-blue-50/40">{item.ballot_date || '--'}</td>
+                      <td class="p-4">
+                        <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-lg text-xs font-bold uppercase">
+                          {getDbField(item, 'status_label')}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+      
+          {/* TAB 2: Upcoming Property Matrix Overview */}
+          {activeTab === 'upcoming' && (
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+              {applications.filter(item => item.tab_type === 'upcoming').map(item => (
+                <div key={item.id} class="border border-slate-100 p-5 rounded-xl bg-slate-50/50 space-y-2">
+                  <span class="text-xs font-bold tracking-widest text-blue-600 uppercase">
+                    {getDbField(item, 'phase_label')}
+                  </span>
+                  <h3 class="text-lg font-bold text-slate-900">{getDbField(item, 'project_name')}</h3>
+                  <p class="text-sm text-slate-500">{getDbField(item, 'description')}</p>
+                  <div class="text-xs bg-slate-200/60 inline-block px-3 py-1 rounded-md font-semibold text-slate-700">
+                    {item.total_units_configured || '0'} Units
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+      
+          {/* TAB 3: Dynamic Price Bounds & Size Range Metrics */}
+          {activeTab === 'inventory' && (
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-50 border-b border-slate-200 text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <th class="p-4">{lang === 'en' ? 'Project' : '項目名稱'}</th>
+                    <th class="p-4 text-center">{lang === 'en' ? 'Remaining Units' : '剩餘伙數'}</th>
+                    <th class="p-4">{lang === 'en' ? 'Price Bound' : '價格範圍'}</th>
+                    <th class="p-4">{lang === 'en' ? 'Size Boundary' : '面積範圍'}</th>
+                  </tr>
+                </thead>
+                <tbody class="text-sm divide-y divide-slate-100 font-medium text-slate-700">
+                  {applications.filter(item => item.tab_type === 'inventory' || item.remaining_units).map(item => (
+                    <tr key={item.id} class="hover:bg-slate-50 transition-colors">
+                      <td class="p-4 font-bold text-slate-900">{getDbField(item, 'project_name')}</td>
+                      <td class="p-4 text-center font-bold text-rose-600 bg-rose-50/30">
+                        {item.remaining_units} / {item.total_units}
+                      </td>
+                      <td class="p-4 font-mono text-slate-900">
+                        {item.lowest_price} - {item.highest_price}
+                      </td>
+                      <td class="p-4 font-mono text-slate-600">
+                        {item.smallest_size} - {item.largest_size} sq.ft.
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+      
         </div>
       </section>
+
 
       {/* --- IMAGE PROFILES GALLERY CARDS MATRIX --- */}
       <section class="max-w-6xl mx-auto px-4 space-y-4">
