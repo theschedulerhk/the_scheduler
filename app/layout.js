@@ -27,7 +27,7 @@ export default function RootLayout({ children }) {
               <img 
                 src="/images/TheScheduler_b_logo.svg" 
                 alt={`${translations.brand[lang]} Logo`} 
-                class="h-8 w-auto object-contain group-hover:opacity-90 transition-opacity" 
+                class="h-8 w-auto object-contain transition-opacity" 
               />
             </Link>
             
