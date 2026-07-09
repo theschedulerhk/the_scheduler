@@ -12,12 +12,26 @@ export default function RootLayout({ children }) {
       <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen relative">
         
         {/* --- STICKY NAVIGATION BAR --- */}
+        {/* --- STICKY NAVIGATION BAR --- */}
         <header class="sticky top-0 z-40 bg-white/95 border-b border-slate-200/80 backdrop-blur-md">
           <nav class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-            <Link href="/" class="flex items-center gap-2 font-black text-xl text-blue-600 tracking-tight">
-              <span>🏢</span> {translations.brand[lang]} {/* ◄ New key target access format */}
+            
+            {/* LOGO LINK WRAPPER CONTAINER */}
+            <Link href="/" class="flex items-center gap-2.5 group">
+              {/* 
+                Tailwind class breakdown for sizing:
+                h-8          -> Sets fixed height to 32px to match header balance.
+                w-auto       -> Automatically handles image proportional width without squishing.
+                object-contain -> Safeguards the logo bounds from distorting.
+              */}
+              <img 
+                src="/images/TheScheduler_b_logo.svg" 
+                alt={`${translations.brand[lang]} Logo`} 
+                class="h-8 w-auto object-contain group-hover:opacity-90 transition-opacity" 
+              />
             </Link>
             
+            {/* Functional Menu Buttons Area */}
             <div class="flex items-center gap-6 font-semibold text-sm">
               <Link href="/properties" class="text-slate-600 hover:text-blue-600 transition-colors">
                 {translations.navProperties[lang]}
@@ -26,34 +40,20 @@ export default function RootLayout({ children }) {
                 {translations.navCalculator[lang]}
               </Link>
               
-              {/* --- CONTROL BUTTON CLUSTER --- */}
+              {/* Language Toggle buttons block */}
               <div class="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs font-bold shadow-inner">
-                <button 
-                  onClick={() => setLang('zh_hk')} 
-                  class={`px-2 py-1 rounded-md transition-all ${lang === 'zh_hk' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
-                >
-                  繁
-                </button>
-                <button 
-                  onClick={() => setLang('zh_cn')} 
-                  class={`px-2 py-1 rounded-md transition-all ${lang === 'zh_cn' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
-                >
-                  简
-                </button>
-                <button 
-                  onClick={() => setLang('en')} 
-                  class={`px-2 py-1 rounded-md transition-all ${lang === 'en' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
-                >
-                  ENG
-                </button>
+                <button onClick={() => setLang('zh_hk')} class={`px-2 py-1 rounded-md transition-all ${lang === 'zh_hk' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}>繁</button>
+                <button onClick={() => setLang('en')} class={`px-2 py-1 rounded-md transition-all ${lang === 'en' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}>ENG</button>
               </div>
-
+        
               <Link href="/login" class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-sm text-xs">
                 {translations.navLogin[lang]}
               </Link>
             </div>
+        
           </nav>
         </header>
+
 
         {/* --- MAIN PAGE CONTENT WRAPPER --- */}
         <main>
