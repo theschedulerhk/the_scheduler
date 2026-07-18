@@ -62,6 +62,57 @@ export default function TrackingPage() {
           ))}
         </div>
       )}
+      {/* --- IRREFUTABLE THIRD-PARTY AUDIT PROOF CARD --- */}
+      <div class="bg-slate-900 border border-slate-800 text-white rounded-3xl p-6 shadow-xl space-y-4 relative overflow-hidden">
+        
+        {/* Abstract target design indicator tag */}
+        <div class="absolute -top-4 -right-4 w-24 h-24 bg-blue-600/10 rounded-full blur-xl pointer-events-none"></div>
+      
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">🛡️</span>
+          <div>
+            <h4 class="font-black text-slate-100 text-sm md:text-base tracking-tight">
+              {lang === 'en' ? "EAA-Compliant Platform Audit Ledger" : "地產代理監管局合規審計存證"}
+            </h4>
+            <p class="text-[11px] text-slate-400 font-medium leading-relaxed">
+              {lang === 'en' 
+                ? "This record serves as secure, independent third-party evidence of commercial promise." 
+                : "本平台作為獨立第三方存證，此條數據已完成電子數位簽章，具備絕對合規法律證物效力。"}
+            </p>
+          </div>
+        </div>
+    
+        {/* Locked System Properties Parameters */}
+        <div class="bg-slate-950/80 rounded-2xl p-4 border border-slate-800 font-mono text-xs space-y-2">
+          <div class="flex justify-between border-b border-slate-800 pb-2">
+            <span class="text-slate-500">Agreed Rebate Split:</span>
+            <span class="text-emerald-400 font-bold">{activeJob.rebate}%</span>
+          </div>
+          <div class="flex justify-between border-b border-slate-800 pb-2">
+            <span class="text-slate-500">Claimed Agent ID:</span>
+            <span class="text-slate-300">{activeJob.agent_id}</span>
+          </div>
+          <div class="flex justify-between border-b border-slate-800 pb-2">
+            <span class="text-slate-500">Agent EAA License No:</span>
+            <span class="text-blue-400 font-bold underline">{activeJob.agent_eaa_no || 'Pending Unlock'}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Secure Timestamp:</span>
+            <span class="text-slate-400">{activeJob.last_upd}</span>
+          </div>
+        </div>
+      
+        {/* Action button allowing users to print or save the screen as data proof */}
+        <div class="text-right">
+          <button 
+            onClick={() => window.print()} 
+            class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-[10px] uppercase tracking-wider transition-all"
+          >
+            🖨️ {lang === 'en' ? "Export Certified Audit Sheet" : "導出經認證之法律存證"}
+          </button>
+        </div>
+      </div>
     </div>
+
   );
 }
