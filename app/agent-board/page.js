@@ -34,31 +34,41 @@ export default function AgentMatchBoard({ lang = 'en' }) {
   }, []);
 
   // 3. The Uber "RACE" Claim Mechanism
-  async function claimCustomer(applicationId) {
+  async function claimCustomer(jobId, requestedRebate) {
     if (!myAgentId) return alert("Please log in as an agent first.");
-
-    // Prompt for required Hong Kong EAA License No. before claiming
+  
+    // --- THE LEGAL VALIDATOR POPUP ---
+    const legalConfirmation = window.confirm(
+      lang === 'en' 
+        ? `🚨 LEGAL WARNING & CONFIRMATION:\n\nAre you absolutely sure you want to accept this application?\n\nBy clicking OK, you explicitly bind your intent to fulfill a ${requestedRebate}% commission rebate split to this buyer. This record is locked on the platform ledger and will be provided directly to the EAA in the event of an arbitrage dispute.`
+        : `🚨 法律合約確認及警告：\n\n您是否百分之百確定接單？\n\n一旦按下確認，即代表您在法律意向層面上，完全同意並承諾向此買家提供【${requestedRebate}%】的發展商佣金回贈。此紀錄將永久鎖定於平台數據庫內，若日後出現糾紛，此紀錄將直接遞交予地產代理監管局 (EAA) 作為書面誠信供詞及證據。`
+    );
+  
+    if (!legalConfirmation) return; // Breaks execution if they try to chicken out
+  
+    // Prompt for mandatory Hong Kong EAA License No. before claiming
     const eaaNo = prompt(lang === 'en' ? "Enter your EAA License Number to lock this claim:" : "請輸入您的地產代理EAA牌照號碼以鎖定配對：");
     if (!eaaNo) return;
-
-    // Update the row instantly. Row Level Security or a check ensures first-come, first-served
+  
+    setLoading(true);
     const { error } = await supabase
-      .from('buyer_applications')
+      .from('applications')
       .update({
         agent_id: myAgentId,
         agent_eaa_no: eaaNo,
-        step_id: 2, // Advance step_id to 2: "Prepare physical form & Cashier Order"
+        step_id: 2, // Moves from Submitted (1) to Prepare physical forms (2)
         last_upd: new Date().toISOString()
       })
-      .eq('id', applicationId);
-
+      .eq('id', jobId);
+  
     if (error) {
       alert(lang === 'en' ? "Too slow! Another agent already claimed this client." : "慢了一步！此客戶已被其他代理接單。");
     } else {
-      alert(lang === 'en' ? "🎉 Client locked! Pay your $300 HKD fee to unlock contact data." : "🎉 接單成功！請支付$300港幣配對費以解鎖客戶資料。");
-      fetchOpenJobs(); // Refresh board
+      alert(lang === 'en' ? "🎉 Match Locked! Proceed to prepare the physical form." : "🎉 接單成功！請即刻準備實體表格及本票。");
+      fetchOpenJobs(); 
     }
   }
+
 
   return (
     <div class="max-w-5xl mx-auto px-4 py-8 space-y-6">
