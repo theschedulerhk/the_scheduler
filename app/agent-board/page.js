@@ -116,12 +116,13 @@ export default function AgentMatchBoard({ lang = 'en' }) {
 
               <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                 <span class="text-xs font-bold text-slate-400">Match Fee: <span class="text-slate-800">$300 HKD</span></span>
-                <button 
-                  onClick={() => claimCustomer(job.id)}
+                
+                <button onClick={() => claimCustomer(job.id, job.rebate)}
                   class="px-5 py-2.5 bg-blue-600 text-white font-extrabold rounded-xl text-xs uppercase tracking-wider hover:bg-blue-700 transition-all shadow-md active:scale-95"
                 >
                   ⚡ {lang === 'en' ? "Accept Ride & Match" : "立即接單搶客"}
                 </button>
+
               </div>
             </div>
           ))}
