@@ -25,7 +25,7 @@ export default function WelcomePage({ lang = 'en' }) {
     title: { en: "Email Verification Successful!", zh_hk: "電子郵件認證成功！" },
     sub: { en: "Your EstateFlow profile has been securely activated on the blockchain ledger network.", zh_hk: "您的系統帳戶身份已成功啟用，所有安全存證及合規權限已即時開通。" },
     cardTitle: { en: "Registration Verified", zh_hk: "認證已完成" },
-    desc: { en: "You have successfully verified your email address. You can now log into your distinct space as either a Buyer or an Agent.", zh_hk: "您已成功驗證您的電郵地址。您現在可以隨時使用單一電郵，分流登入您的專屬買家或地產代理帳戶。" },
+    desc: { en: "You have successfully verified your email address. You can now log into your distinct dashboard space as either a Buyer or an Agent.", zh_hk: "您已成功驗證您的電郵地址。您現在可以隨時使用單一電郵，分流登入您的專屬買家或地產代理帳戶。" },
     redirectText: { en: "Automatically redirecting to login portal in", zh_hk: "系統將於以下秒數內自動跳轉至登入口戶：" },
     btnManual: { en: "Go to Login Now ➔", zh_hk: "立即前往登入頁面 ➔" }
   };
