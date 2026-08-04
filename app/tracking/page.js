@@ -1,118 +1,114 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { supabase } from '../../utils/supabase';
 
-export default function TrackingPage() {
-  const [user, setUser] = useState(null);
-  const [orders, setOrders] = useState([]);
+export default function BuyerDashboardHub({ lang = 'en' }) {
+  const [loading, setLoading] = useState(true);
+  const [activeApplications, setActiveApplications] = useState([]);
 
+  // Load all recorded application history rows for this specific authenticated Buyer
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        setUser(user);
-        supabase
-          .from('orders')
-          .select('*')
-          .eq('customer_email', user.email)
-          .then(({ data, error }) => {
-            if (!error && data) setOrders(data);
-          });
+    async function loadBuyerRecords() {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { window.location.href = '/login'; return; }
+
+      // Fetch rows matching the buyer's unique u_id handle
+      const { data, error } = await supabase
+        .from('applications')
+        .select('*')
+        .eq('u_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        setActiveApplications(data);
       }
-    });
+      setLoading(false);
+    }
+    loadBuyerRecords();
   }, []);
 
-  if (!user) {
-    return (
-      <div class="text-center py-16 bg-white border border-slate-100 rounded-2xl shadow-sm max-w-md mx-auto space-y-4 mt-10">
-        <span class="text-4xl">⚠️</span>
-        <h2 class="text-xl font-bold text-slate-900">Authentication Required</h2>
-        <p class="text-sm text-slate-500 max-w-xs mx-auto">Please secure your session to access historical order tracking records.</p>
-        <a href="/login" class="inline-block px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl text-sm hover:bg-blue-700 transition-colors shadow-sm">
-          Go to Portal
-        </a>
-      </div>
-    );
-  }
+  const ui = {
+    title: { en: "Your Property Portal Hub", zh_hk: "您的置業中心控制台" },
+    sub: { en: "Manage your first-hand residential applications and track matched agent milestones.", zh_hk: "管理您的一手住宅物業意向申請，並追蹤已配對地產代理的流程進度。" },
+    newBtnTitle: { en: "Launch New Application", zh_hk: "➕ 提交全新物業意向申請" },
+    newBtnSub: { en: "Configure priority units and input your requested rebate cut percentage.", zh_hk: "設定全新心儀新盤樓盤、優先單位次序及索取回佣拆賬比例。" },
+    ongoingTitle: { en: "Your Ongoing Active Pipelines", zh_hk: "您正在進行中的置業追蹤條" },
+    projectLabel: { en: "Target Project Node Reference", zh_hk: "目標一手新盤物業" },
+    rebateLabel: { en: "Agreed Rebate Target", zh_hk: "要求回佣拆賬" },
+    stepLabel: { en: "Current Workflow Step ID", zh_hk: "目前進度狀態代碼" },
+    btnView: { en: "Enter Live Tracker ➔", zh_hk: "進入即時進度條 ➔" }
+  };
+
+  if (loading) return <div class="text-center py-24 font-bold text-slate-400 animate-pulse">⌛ Synchronizing Secure Buyer Profile space...</div>;
 
   return (
-    <div class="space-y-6 max-w-2xl mx-auto">
+    <div class="max-w-4xl mx-auto px-4 py-8 space-y-8">
+      
+      {/* Title Header Card */}
       <div class="border-b border-slate-200 pb-4">
-        <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Your Tracking Dashboard</h2>
-        <p class="text-sm text-slate-500 mt-1">Logged in active profile: <span class="font-semibold text-slate-700">{user.email}</span></p>
+        <h2 class="text-2xl font-black text-slate-900 tracking-tight">{ui.title[lang]}</h2>
+        <p class="text-sm text-slate-500 mt-1">{ui.sub[lang]}</p>
       </div>
 
-      {orders.length === 0 ? (
-        <div class="text-center py-12 bg-white border border-slate-100 rounded-2xl text-slate-400 text-sm">
-          You do not have any active tracking procedures logged.
+      {/* --- SELECTION SECTION A: TRIGGER NEW APPLICATION FORM --- */}
+      <Link href="/tracking/new" class="block bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-6 md:p-8 text-white shadow-xl hover:scale-[1.01] hover:shadow-blue-500/10 transition-all border border-blue-500/20 group">
+        <div class="flex justify-between items-center">
+          <div class="space-y-1.5">
+            <h3 class="text-lg md:text-xl font-black tracking-tight group-hover:underline">{ui.newBtnTitle[lang]}</h3>
+            <p class="text-xs text-blue-100 max-w-xl font-medium leading-relaxed">{ui.newBtnSub[lang]}</p>
+          </div>
+          <span class="text-2xl transform group-hover:translate-x-1 transition-transform">➔</span>
         </div>
-      ) : (
-        <div class="space-y-4">
-          {orders.map(order => (
-            <div key={order.id} class="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm flex items-center justify-between group hover:border-slate-200 transition-all">
-              <div class="space-y-1.5">
-                <p class="text-[10px] font-mono tracking-wider text-slate-400 uppercase">ID: {order.id.slice(0, 8)}...</p>
-                <h4 class="font-bold text-slate-900 text-base">{order.product_name}</h4>
-              </div>
-              
-              {/* Flexible visual status badge */}
-              <div class="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full font-bold text-xs border border-blue-100/50">
-                ● {order.status}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-      {/* --- IRREFUTABLE THIRD-PARTY AUDIT PROOF CARD --- */}
-      <div class="bg-slate-900 border border-slate-800 text-white rounded-3xl p-6 shadow-xl space-y-4 relative overflow-hidden">
+      </Link>
+
+      {/* --- SELECTION SECTION B: ONGOING ACTIVE APPLICATIONS LIST --- */}
+      <div class="space-y-4 pt-2">
+        <h3 class="text-base font-extrabold text-slate-900 tracking-tight">{ui.ongoingTitle[lang]}</h3>
         
-        {/* Abstract target design indicator tag */}
-        <div class="absolute -top-4 -right-4 w-24 h-24 bg-blue-600/10 rounded-full blur-xl pointer-events-none"></div>
-      
-        <div class="flex items-center gap-3">
-          <span class="text-2xl">🛡️</span>
-          <div>
-            <h4 class="font-black text-slate-100 text-sm md:text-base tracking-tight">
-              {lang === 'en' ? "EAA-Compliant Platform Audit Ledger" : "地產代理監管局合規審計存證"}
-            </h4>
-            <p class="text-[11px] text-slate-400 font-medium leading-relaxed">
-              {lang === 'en' 
-                ? "This record serves as secure, independent third-party evidence of commercial promise." 
-                : "本平台作為獨立第三方存證，此條數據已完成電子數位簽章，具備絕對合規法律證物效力。"}
-            </p>
+        {activeApplications.length === 0 ? (
+          <div class="text-center py-12 bg-white border border-dashed border-slate-200 rounded-2xl text-slate-400 text-sm">
+            {lang === 'en' ? "No active or draft property applications found." : "目前暫無任何進行中或草稿物業申請記錄。"}
           </div>
-        </div>
-    
-        {/* Locked System Properties Parameters */}
-        <div class="bg-slate-950/80 rounded-2xl p-4 border border-slate-800 font-mono text-xs space-y-2">
-          <div class="flex justify-between border-b border-slate-800 pb-2">
-            <span class="text-slate-500">Agreed Rebate Split:</span>
-            <span class="text-emerald-400 font-bold">{activeJob.rebate}%</span>
-          </div>
-          <div class="flex justify-between border-b border-slate-800 pb-2">
-            <span class="text-slate-500">Claimed Agent ID:</span>
-            <span class="text-slate-300">{activeJob.agent_id}</span>
-          </div>
-          <div class="flex justify-between border-b border-slate-800 pb-2">
-            <span class="text-slate-500">Agent EAA License No:</span>
-            <span class="text-blue-400 font-bold underline">{activeJob.agent_eaa_no || 'Pending Unlock'}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-slate-500">Secure Timestamp:</span>
-            <span class="text-slate-400">{activeJob.last_upd}</span>
-          </div>
-        </div>
-      
-        {/* Action button allowing users to print or save the screen as data proof */}
-        <div class="text-right">
-          <button 
-            onClick={() => window.print()} 
-            class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-[10px] uppercase tracking-wider transition-all"
-          >
-            🖨️ {lang === 'en' ? "Export Certified Audit Sheet" : "導出經認證之法律存證"}
-          </button>
-        </div>
-      </div>
-    </div>
+        ) : (
+          <div class="grid grid-cols-1 gap-4">
+            {activeApplications.map((app) => (
+              <div key={app.id} class="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm hover:border-slate-300 transition-colors">
+                
+                <div class="grid grid-cols-2 md:flex md:items-center gap-x-6 gap-y-2 text-xs font-semibold">
+                  <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block tracking-wider mb-0.5">Application ID</span>
+                    <span class="text-sm font-bold text-slate-900 font-mono">#{app.id}</span>
+                  </div>
+                  <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block tracking-wider mb-0.5">{ui.projectLabel[lang]}</span>
+                    <span class="text-sm font-bold text-slate-800">Applications Node Project</span>
+                  </div>
+                  <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block tracking-wider mb-0.5">{ui.rebateLabel[lang]}</span>
+                    <span class="text-sm font-black text-emerald-600">{app.rebate}%</span>
+                  </div>
+                  <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block tracking-wider mb-0.5">{ui.stepLabel[lang]}</span>
+                    <span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded font-mono text-[11px]">ID: {app.step_id}</span>
+                  </div>
+                </div>
 
+                {/* Direct access anchor link routing into the 18-step linear roadmap display view */}
+                <Link 
+                  href={`/tracking/pipeline?id=${app.id}`} 
+                  class="w-full md:w-auto px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-center text-xs font-bold transition-colors shadow-sm"
+                >
+                  {ui.btnView[lang]}
+                </Link>
+
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+    </div>
   );
 }
