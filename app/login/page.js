@@ -187,6 +187,16 @@ export default function LoginPage({ lang = 'en' }) {
           <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="••••••••" />
         </div>
 
+        <div class="text-right">
+          <button 
+            type="button" 
+            onClick={handleForgotPassword}
+            class="text-xs font-bold text-slate-400 hover:text-blue-600 transition-colors underline"
+          >
+            {lang === 'en' ? "Forgot Password?" : "忘記密碼？"}
+          </button>
+        </div>
+
         <button type="submit" disabled={loading} class="w-full py-3 bg-blue-600 text-white font-extrabold rounded-xl text-xs uppercase tracking-wider hover:bg-blue-700 transition-all">
           {loading ? "..." : isSignUpMode ? "Register Account" : "Login Securely"}
         </button>
