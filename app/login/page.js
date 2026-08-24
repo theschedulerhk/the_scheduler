@@ -155,7 +155,7 @@ export default function LoginPage({ lang = 'en' }) {
             <label class={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${selectedRole === 'buyer' ? 'border-blue-600 bg-white ring-2 ring-blue-500/10' : 'border-slate-200'}`}>
               <div class="flex items-center gap-3">
                 <input type="radio" name="role" value="buyer" checked={selectedRole === 'buyer'} onChange={() => setSelectedRole('buyer')} class="w-4 h-4 text-blue-600" />
-                <span class="text-xs font-bold text-slate-700">🛒 Property S Buyer (新盤買家)</span>
+                <span class="text-xs font-bold text-slate-700">🛒 Property Buyer (新盤買家)</span>
               </div>
             </label>
             <label class={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${selectedRole === 'agent' ? 'border-blue-600 bg-white ring-2 ring-blue-500/10' : 'border-slate-200'}`}>
