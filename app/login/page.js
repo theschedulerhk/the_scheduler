@@ -31,12 +31,18 @@ export default function LoginPage({ lang = 'en' }) {
     switchLogin: { en: "Already have an account? Sign in here ➔", zh_hk: "已有專屬帳戶？按此前往登入 ➔" }
   };
 
+  // Improved format rule helper: Administrative accounts do NOT get tagged!
   const formatTaggedEmail = (emailStr, roleStr) => {
-    const parts = emailStr.trim().split('@');
-    if (parts.length !== 2) return emailStr;
-    return `${parts}+${roleStr}@${parts}`.toLowerCase();
+    const cleanEmail = emailStr.trim().toLowerCase();
+    if (roleStr === 'others') {
+      return cleanEmail; // Returns raw string (e.g. master@theschedulerhk.com) without modifications
+    }
+    const parts = cleanEmail.split('@');
+    if (parts.length !== 2) return cleanEmail;
+    return `${parts[0]}+${roleStr}@${parts[1]}`;
   };
 
+  // --- ACTIONS: SUBMIT LOGIC ---
   async function handleFormSubmit(e) {
     e.preventDefault();
     if (!rawEmail || !password) return;
@@ -44,43 +50,27 @@ export default function LoginPage({ lang = 'en' }) {
     setLoading(true);
     setMessage({ text: '', isError: false });
 
+    // Generate the correct email target variation string
     const processedEmail = formatTaggedEmail(rawEmail, selectedRole);
-    let uploadedFileUrl = '';
-
-    // Handle agent EAA cert photo upload step
-    if (isSignUpMode && selectedRole === 'agent') {
-      if (!file) {
-        alert(lang === 'en' ? "Please upload your EAA license certificate card photo." : "請上載您的EAA代理牌照相片。");
-        setLoading(false);
-        return;
-      }
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `certs/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage.from('property-images').upload(filePath, file);
-      if (uploadError) {
-        setMessage({ text: `❌ Upload Failed: ${uploadError.message}`, isError: true });
-        setLoading(false);
-        return;
-      }
-      const { data: { publicUrl } } = supabase.storage.from('property-images').getPublicUrl(filePath);
-      uploadedFileUrl = publicUrl;
-    }
 
     if (isSignUpMode) {
-      // EXECUTE SECURE SIGN UP
+      // BLOCK INTERNET USERS FROM REGISTERING AS 'OTHERS' PRIVATELY
+      if (selectedRole === 'others') {
+        setMessage({ text: "❌ Access Denied. Administrative roles can only be initialized manually by the Master system console.", isError: true });
+        setLoading(false);
+        return;
+      }
+
+      // STANDARD REGISTRATION FOR BUYERS / AGENTS
       const { data, error } = await supabase.auth.signUp({
         email: processedEmail,
         password: password,
         options: {
           data: {
-            role: selectedRole, // Buyer or Agent dynamically tagged from frontend UI selection
+            role: selectedRole,
             full_name: fullName,
             whatsapp_number: whatsapp,
-            display_email: rawEmail.trim(),
-            company_license_no: eaaLicenseNo,
-            eaa_cert_url: uploadedFileUrl
+            display_email: rawEmail.trim()
           }
         }
       });
@@ -89,11 +79,12 @@ export default function LoginPage({ lang = 'en' }) {
       if (error) {
         setMessage({ text: `❌ ${error.message}`, isError: true });
       } else if (data?.user) {
-        setMessage({ text: lang === 'en' ? "🎉 Account registered successfully!" : "🎉 帳戶註冊成功！歡迎使用系統。", isError: false });
+        setMessage({ text: lang === 'en' ? `🎉 Registration complete for [${selectedRole.toUpperCase()}].` : `🎉 註冊成功！您的專屬帳戶已即時開通。`, isError: false });
         setTimeout(() => { window.location.href = "/"; }, 1500);
       }
+
     } else {
-      // EXECUTE SECURE SIGN IN
+      // EXECUTE LOGIN SYSTEM FOR ALL 4 ROLES
       const { data, error } = await supabase.auth.signInWithPassword({
         email: processedEmail,
         password: password,
@@ -101,10 +92,19 @@ export default function LoginPage({ lang = 'en' }) {
 
       setLoading(false);
       if (error) {
-        setMessage({ text: `❌ ${error.message}`, isError: true });
+        setMessage({ text: `❌ ${error.message} (Verify your radio identity selector is accurate)`, isError: true });
       } else if (data?.user) {
-        setMessage({ text: lang === 'en' ? "🎉 Access verified! Loading panel..." : "🎉 登入成功！正在進入控制大堂...", isError: false });
-        setTimeout(() => { window.location.href = "/"; }, 1000);
+        setMessage({ text: lang === 'en' ? "🎉 Access verified! Loading workspace..." : "🎉 認證成功！正在載入專屬控制大堂...", isError: false });
+        
+        // Smart Routing Trick: If Master or Admin signs in, skip the home loop and slide them straight into their control panels!
+        const userRole = data.user.user_metadata?.role || 'buyer';
+        setTimeout(() => {
+          if (userRole === 'master' || userRole === 'admin') {
+            window.location.href = "/master-panel"; // Redirect straight to management cockpit
+          } else {
+            window.location.href = "/";
+          }
+        }, 1000);
       }
     }
   }
@@ -148,20 +148,32 @@ export default function LoginPage({ lang = 'en' }) {
       )}
 
       <form class="space-y-4" onSubmit={handleFormSubmit}>
-        {/* Strict User-Facing Identity Toggle Selectors */}
+        {/* --- DYNAMIC RADIO BUTTON IDENTITY MATRIX --- */}
         <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3">
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500">Access Identity</label>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500">{ui.roleLabel[lang]}</label>
+          
           <div class="flex flex-col gap-2">
-            <label class={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${selectedRole === 'buyer' ? 'border-blue-600 bg-white ring-2 ring-blue-500/10' : 'border-slate-200'}`}>
+            {/* 1. Buyer Option */}
+            <label class={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all bg-white ${selectedRole === 'buyer' ? 'border-blue-600 ring-2 ring-blue-500/10' : 'border-slate-200'}`}>
               <div class="flex items-center gap-3">
-                <input type="radio" name="role" value="buyer" checked={selectedRole === 'buyer'} onChange={() => setSelectedRole('buyer')} class="w-4 h-4 text-blue-600" />
-                <span class="text-xs font-bold text-slate-700">🛒 Property Buyer (新盤買家)</span>
+                <input type="radio" name="role" value="buyer" checked={selectedRole === 'buyer'} onChange={() => setSelectedRole('buyer')} class="w-4 h-4 text-blue-600 focus:ring-blue-500" />
+                <span class="text-xs font-bold text-slate-700">🛒 {ui.roleBuyer[lang]}</span>
               </div>
             </label>
-            <label class={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${selectedRole === 'agent' ? 'border-blue-600 bg-white ring-2 ring-blue-500/10' : 'border-slate-200'}`}>
+
+            {/* 2. Agent Option */}
+            <label class={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all bg-white ${selectedRole === 'agent' ? 'border-blue-600 ring-2 ring-blue-500/10' : 'border-slate-200'}`}>
               <div class="flex items-center gap-3">
-                <input type="radio" name="role" value="agent" checked={selectedRole === 'agent'} onChange={() => setSelectedRole('agent')} class="w-4 h-4 text-blue-600" />
-                <span class="text-xs font-bold text-slate-700">💼 Real Estate Agent (持牌經紀)</span>
+                <input type="radio" name="role" value="agent" checked={selectedRole === 'agent'} onChange={() => setSelectedRole('agent')} class="w-4 h-4 text-blue-600 focus:ring-blue-500" />
+                <span class="text-xs font-bold text-slate-700">💼 {ui.roleAgent[lang]}</span>
+              </div>
+            </label>
+
+            {/* 3. Others / Admin Option */}
+            <label class={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all bg-white ${selectedRole === 'others' ? 'border-slate-900 ring-2 ring-slate-900/10' : 'border-slate-200'}`}>
+              <div class="flex items-center gap-3">
+                <input type="radio" name="role" value="others" checked={selectedRole === 'others'} onChange={() => setSelectedRole('others')} class="w-4 h-4 text-slate-900 focus:ring-slate-900" />
+                <span class="text-xs font-bold text-slate-700">🛠️ {ui.roleOthers[lang]}</span>
               </div>
             </label>
           </div>
