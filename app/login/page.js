@@ -20,33 +20,6 @@ export default function LoginPage({ lang = 'en' }) {
     return `${parts}+${roleStr}@${parts}`.toLowerCase();
   };
 
-  async function handleForgotPassword() {
-    if (!rawEmail) {
-      alert(lang === 'en' ? "Please input your email address first." : "請先在上方輸入您的電子郵件地址。");
-      return;
-    }
-  
-    setLoading(true);
-    
-    // Appends your unique role tagging switch (+buyer or +agent) to map the right sub-space!
-    const processedEmail = formatTaggedEmail(rawEmail, selectedRole);
-  
-    const { error } = await supabase.auth.resetPasswordForEmail(processedEmail, {
-      // Tells Supabase where to redirect the user after clicking the link in their inbox
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-  
-    setLoading(false);
-    if (error) {
-      setMessage({ text: `❌ ${error.message}`, isError: true });
-    } else {
-      setMessage({ 
-        text: lang === 'en' ? "✨ Password recovery recovery link sent! Check your inbox." : "✨ 密碼重置連結已成功發送！請檢查您的電子郵件信箱。", 
-        isError: false 
-      });
-    }
-  }
-
   async function handleFormSubmit(e) {
     e.preventDefault();
     if (!rawEmail || !password) return;
@@ -116,6 +89,31 @@ export default function LoginPage({ lang = 'en' }) {
         setMessage({ text: lang === 'en' ? "🎉 Access verified! Loading panel..." : "🎉 登入成功！正在進入控制大堂...", isError: false });
         setTimeout(() => { window.location.href = "/"; }, 1000);
       }
+    }
+  }
+
+  async function handleForgotPassword() {
+    if (!rawEmail) {
+      alert(lang === 'en' ? "Please input your email address first." : "請先在上方輸入您的電子郵件地址。");
+      return;
+    }
+    setLoading(true);
+    
+    // Combines email with your radio selection tagging (+buyer or +agent)
+    const processedEmail = formatTaggedEmail(rawEmail, selectedRole);
+  
+    const { error } = await supabase.auth.resetPasswordForEmail(processedEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+  
+    setLoading(true);
+    if (error) {
+      setMessage({ text: `❌ ${error.message}`, isError: true });
+    } else {
+      setMessage({ 
+        text: lang === 'en' ? "✨ Password recovery link sent! Check your inbox." : "✨ 密碼重置連結已成功發送！請檢查您的電子郵件信箱。", 
+        isError: false 
+      });
     }
   }
 
