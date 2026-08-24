@@ -20,33 +20,6 @@ export default function LoginPage({ lang = 'en' }) {
     return `${parts}+${roleStr}@${parts}`.toLowerCase();
   };
 
-  async function handleForgotPassword() {
-    if (!rawEmail) {
-      alert(lang === 'en' ? "Please input your email address first." : "請先在上方輸入您的電子郵件地址。");
-      return;
-    }
-  
-    setLoading(true);
-    
-    // Appends your unique role tagging switch (+buyer or +agent) to map the right sub-space!
-    const processedEmail = formatTaggedEmail(rawEmail, selectedRole);
-  
-    const { error } = await supabase.auth.resetPasswordForEmail(processedEmail, {
-      // Tells Supabase where to redirect the user after clicking the link in their inbox
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-  
-    setLoading(false);
-    if (error) {
-      setMessage({ text: `❌ ${error.message}`, isError: true });
-    } else {
-      setMessage({ 
-        text: lang === 'en' ? "✨ Password recovery recovery link sent! Check your inbox." : "✨ 密碼重置連結已成功發送！請檢查您的電子郵件信箱。", 
-        isError: false 
-      });
-    }
-  }
-
   async function handleFormSubmit(e) {
     e.preventDefault();
     if (!rawEmail || !password) return;
@@ -146,7 +119,7 @@ export default function LoginPage({ lang = 'en' }) {
             <label class={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${selectedRole === 'agent' ? 'border-blue-600 bg-white ring-2 ring-blue-500/10' : 'border-slate-200'}`}>
               <div class="flex items-center gap-3">
                 <input type="radio" name="role" value="agent" checked={selectedRole === 'agent'} onChange={() => setSelectedRole('agent')} class="w-4 h-4 text-blue-600" />
-                <span class="text-xs font-bold text-slate-700">💼 Real Estates Agent (持牌經紀)</span>
+                <span class="text-xs font-bold text-slate-700">💼 Real Estate Agent (持牌經紀)</span>
               </div>
             </label>
           </div>
@@ -185,16 +158,6 @@ export default function LoginPage({ lang = 'en' }) {
         <div>
           <label class="block text-xs font-bold text-slate-500 mb-1">Password</label>
           <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="••••••••" />
-        </div>
-
-        <div class="text-right">
-          <button 
-            type="button" 
-            onClick={handleForgotPassword}
-            class="text-xs font-bold text-slate-400 hover:text-blue-600 transition-colors underline"
-          >
-            {lang === 'en' ? "Forgot Password?" : "忘記密碼？"}
-          </button>
         </div>
 
         <button type="submit" disabled={loading} class="w-full py-3 bg-blue-600 text-white font-extrabold rounded-xl text-xs uppercase tracking-wider hover:bg-blue-700 transition-all">
