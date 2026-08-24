@@ -182,7 +182,7 @@ export default function LoginPage({ lang = 'en' }) {
         </div>
         <div>
           <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
-            {ui.passLabel[lang]}
+            Account Password
           </label>
           <input 
             type="password" 
@@ -195,11 +195,11 @@ export default function LoginPage({ lang = 'en' }) {
             placeholder="••••••••" 
           />
         
-          {/* --- ADD THIS CODES CONTAINER IMMEDIATELY BELOW THE PASSWORD INPUT --- */}
+          {/* --- ENSURE THIS EXACT DIV SITS COHESIVELY INSIDE THIS CONTAINER LAYER --- */}
           <div class="text-right mt-1.5">
             <button 
               type="button" 
-              onClick={handleForgotPassword} // ◄ Fires the background Supabase reset email trigger
+              onClick={handleForgotPassword}
               class="text-xs font-bold text-slate-400 hover:text-blue-600 transition-colors underline bg-transparent border-none cursor-pointer"
             >
               {lang === 'en' ? "Forgot Password?" : "忘記密碼？"}
