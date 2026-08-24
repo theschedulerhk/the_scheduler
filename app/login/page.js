@@ -14,6 +14,23 @@ export default function LoginPage({ lang = 'en' }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', isError: false });
 
+  const ui = {
+    titleLogin: { en: "Secure Sign In Portal", zh_hk: "系統安全登入門戶" },
+    titleRegister: { en: "Create Unique Profile", zh_hk: "註冊新帳戶身份" },
+    subText: { en: "Please select your active role below. You can maintain distinct Buyer and Agent spaces under the same email inbox.", zh_hk: "請在下方選擇您目前要使用的身份。您可以使用相同的電郵同時開通獨立的買家與代理帳戶。" },
+    emailLabel: { en: "Email Address", zh_hk: "電子郵件地址" },
+    passLabel: { en: "Account Password", zh_hk: "帳戶安全密碼" },
+    nameLabel: { en: "Full Legal Name", zh_hk: "法定真實姓名 (與身份證相同)" },
+    phoneLabel: { en: "WhatsApp Contact Number", zh_hk: "WhatsApp 聯絡電話" },
+    roleLabel: { en: "Select Access Role Identity (Mandatory)", zh_hk: "選擇目前登入/註冊身份 (必填)" },
+    roleBuyer: { en: "I am a Property Buyer", zh_hk: "我是一手新盤買家" },
+    roleAgent: { en: "I am a Real Estate Agent", zh_hk: "我是地產代理經紀" },
+    btnLogin: { en: "Secure Login ➔", zh_hk: "確認安全登入 ➔" },
+    btnRegister: { en: "Complete Registration", zh_hk: "完成註冊並開通" },
+    switchRegister: { en: "New to EstateFlow? Create an account ➔", zh_hk: "首次使用？立即註冊新帳戶 ➔" },
+    switchLogin: { en: "Already have an account? Sign in here ➔", zh_hk: "已有專屬帳戶？按此前往登入 ➔" }
+  };
+
   const formatTaggedEmail = (emailStr, roleStr) => {
     const parts = emailStr.trim().split('@');
     if (parts.length !== 2) return emailStr;
