@@ -183,18 +183,30 @@ export default function LoginPage({ lang = 'en' }) {
           <input type="email" required value={rawEmail} onChange={(e) => setRawEmail(e.target.value)} class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="name@domain.com" />
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-500 mb-1">Password</label>
-          <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="••••••••" />
-        </div>
-
-        <div class="text-right">
-          <button 
-            type="button" 
-            onClick={handleForgotPassword}
-            class="text-xs font-bold text-slate-400 hover:text-blue-600 transition-colors underline"
-          >
-            {lang === 'en' ? "Forgot Password?" : "忘記密碼？"}
-          </button>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+            {ui.passLabel[lang]}
+          </label>
+          <input 
+            type="password" 
+            required 
+            minLength={6} 
+            disabled={loading} 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm font-semibold text-slate-800" 
+            placeholder="••••••••" 
+          />
+        
+          {/* --- ADD THIS CODES CONTAINER IMMEDIATELY BELOW THE PASSWORD INPUT --- */}
+          <div class="text-right mt-1.5">
+            <button 
+              type="button" 
+              onClick={handleForgotPassword} // ◄ Fires the background Supabase reset email trigger
+              class="text-xs font-bold text-slate-400 hover:text-blue-600 transition-colors underline bg-transparent border-none cursor-pointer"
+            >
+              {lang === 'en' ? "Forgot Password?" : "忘記密碼？"}
+            </button>
+          </div>
         </div>
 
         <button type="submit" disabled={loading} class="w-full py-3 bg-blue-600 text-white font-extrabold rounded-xl text-xs uppercase tracking-wider hover:bg-blue-700 transition-all">
