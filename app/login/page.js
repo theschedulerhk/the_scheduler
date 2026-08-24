@@ -110,30 +110,28 @@ export default function LoginPage({ lang = 'en' }) {
     }
   }
 
+  // Locate this function inside your app/login/page.js file:
   async function handleForgotPassword() {
     if (!rawEmail) {
       alert(lang === 'en' ? "Please input your email address first." : "請先在上方輸入您的電子郵件地址。");
       return;
     }
     setLoading(true);
-    
-    // Combines email with your radio selection tagging (+buyer or +agent)
     const processedEmail = formatTaggedEmail(rawEmail, selectedRole);
   
     const { error } = await supabase.auth.resetPasswordForEmail(processedEmail, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      // ◄ REDIRECT TARGET UPDATE: Route tokens through the new callback catcher folder first!
+      redirectTo: `${window.location.origin}/auth/callback`,
     });
   
-    setLoading(true);
+    setLoading(false);
     if (error) {
       setMessage({ text: `❌ ${error.message}`, isError: true });
     } else {
-      setMessage({ 
-        text: lang === 'en' ? "✨ Password recovery link sent! Check your inbox." : "✨ 密碼重置連結已成功發送！請檢查您的電子郵件信箱。", 
-        isError: false 
-      });
+      setMessage({ text: lang === 'en' ? "✨ Password recovery link sent! Check your inbox." : "✨ 密碼重置連結已成功發送！請檢查您的電子郵件信箱。", isError: false });
     }
   }
+
 
   return (
     <div class="max-w-md mx-auto bg-white border border-slate-200 p-8 rounded-3xl shadow-sm space-y-6 mt-6">
