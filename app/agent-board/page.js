@@ -47,10 +47,12 @@ export default function AgentMatchBoard({ lang = 'en' }) {
   // 2. FETCH ACTIVE OPEN LISTINGS
   async function fetchOpenJobs() {
     // Only fire query if security checks pass in background
+    // Ensure agents can only grab distributed rows
     const { data, error } = await supabase
       .from('applications') // Maps straight to your applications table
       .select('*')
-      .eq('step_id', 1); // step_id 1 means "Submitted Application" ready for matching
+      .eq('step_id', 1) // step_id 1 means "Submitted Application" ready for matching
+      .eq('platform_filter_status', 'distributed_to_agents'); // ◄ Add this extra line gate filter
 
     if (!error && data) setOpenApplications(data);
     setLoading(false);
