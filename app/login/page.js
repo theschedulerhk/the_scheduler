@@ -67,6 +67,7 @@ export default function LoginPage({ lang = 'en' }) {
         email: processedEmail,
         password: password,
         options: {
+          emailRedirectTo: `${window.location.origin}/welcome`, 
           data: {
             role: selectedRole,
             full_name: fullName,
